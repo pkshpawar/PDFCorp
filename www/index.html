@@ -289,10 +289,11 @@ async function guard(fn){
   catch(e){$('st').textContent=e&&e.code==='declined'?'Save cancelled.':'Error: '+((e&&e.message)||e)}
 }
 const native=()=>!!(window.Capacitor&&Capacitor.isNativePlatform&&Capacitor.isNativePlatform());
+var _pl={};function plugin(n){try{return _pl[n]||(_pl[n]=Capacitor.registerPlugin(n))}catch(e){return null}}
 const b64=b=>new Promise(r=>{const f=new FileReader();f.onload=()=>r(f.result.split(',')[1]);f.readAsDataURL(b)});
 const MIME={jpg:'image/jpeg',pdf:'application/pdf',zip:'application/zip'};
 async function saveAll(list){
-  if(native()){const DS=DSP;
+  if(native()){const DS=plugin('DownloadSaver');if(!DS)throw new Error('Save plugin not available');
     for(const[n,b]of list)await DS.save({name:n,data:await b64(b),mime:MIME[n.split('.').pop()]||b.type});
     return 'Saved '+list.length+' file(s) to Download/PDFCrop'}
   for(const[n,b]of list)await save(n,b);
@@ -310,19 +311,18 @@ $('sp').onclick=()=>guard(async()=>{
   else{const L=[];for(const c of sel()){const p=mk();add(p,c);L.push([c.name+'.pdf',p.output('blob')])}return await saveAll(L)}});
 /* ---- exit message ---- */
 let leaving=false;
-const AppP=native()?Capacitor.registerPlugin('App'):null,DSP=native()?Capacitor.registerPlugin('DownloadSaver'):null;
 function quit(){
   $('bye').hidden=true;leaving=false;
   if(!native()){try{window.close()}catch(e){}return}
-  try{AppP.exitApp()}catch(e){}
-  try{DSP.exit()}catch(e){}
+  try{plugin('App').exitApp()}catch(e){}
+  try{plugin('DownloadSaver').exit()}catch(e){}
 }
 function bye(){
   if(leaving)return;leaving=true;$('bye').hidden=false;
   setTimeout(quit,2000);
 }
 $('xit').onclick=bye;
-if(AppP)AppP.addListener('backButton',bye);
+try{if(native())plugin('App').addListener('backButton',bye)}catch(e){}
 </script>
 </body>
 </html>
