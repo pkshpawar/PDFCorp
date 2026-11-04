@@ -9,5 +9,8 @@
   },
   "devDependencies": {
     "@capacitor/cli": "^6.1.2"
+  },
+  "scripts": {
+    "capacitor:sync:after": "node scripts/native-setup.js"
   }
 }
