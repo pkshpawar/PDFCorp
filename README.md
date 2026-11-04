@@ -1,4 +1,4 @@
-# PdfCrop APK
+# PDFCrop APK
 
 Crop Aadhaar, PAN, Ayushman, ABHA and other cards from PDFs/images to PVC card size (85.6 x 54 mm).
 Works offline; files never leave your phone. The APK is built automatically by GitHub Actions.
@@ -12,10 +12,14 @@ Works offline; files never leave your phone. The APK is built automatically by G
 For a download link on the Releases page, push a tag such as `v1.0`: `git tag v1.0 && git push origin v1.0`.
 
 ## Saving on Android
-Save buttons open the Android share sheet: choose **Files / Save to device**, Drive, WhatsApp, etc.
+Files are saved straight into **Download/PDFCrop** on your phone (open the Files app > Download > PDFCrop).
+On Android 9 or older, allow Storage permission for the app in Settings if saving fails.
 For many cards use **Save JPEGs as ZIP** or the single multi-page **PDF**.
+
+## Exit message
+Pressing Back (or the Exit button) shows the "जय हिंद" screen with the flag, *Developed by Prakash Pawar* and *Ver 1.0*, then closes the app.
 
 ## Notes
 - This builds a *debug* APK, which installs fine for personal use. For Play Store you need a signed release build.
-- Folder: `www/` = the web app, `capacitor.config.json` = app id/name, `assets/icon-only.png` = launcher icon.
+- Folder: `www/` = the web app, `capacitor.config.json` = app id/name, `assets/icon-only.png` = launcher icon, `native/` = Android code for saving to Download/PDFCrop.
 - Build locally instead: `npm install`, download the 4 libs into `www/lib` (see the workflow), `npx cap add android`, `npx cap sync android`, then build in Android Studio.

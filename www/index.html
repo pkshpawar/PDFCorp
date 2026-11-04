@@ -3,36 +3,50 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>PdfCrop – PVC Card Cropper</title>
-<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#2563eb"><link rel="icon" href="icon-192.png"><link rel="apple-touch-icon" href="icon-192.png">
+<title>PDFCrop – PVC Card Cropper</title>
+<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#0e2a5c"><link rel="icon" href="icon-192.png"><link rel="apple-touch-icon" href="icon-192.png">
 <style>
-:root{--bg:#f6f7f9;--card:#fff;--tx:#1b1f24;--mut:#6a7380;--ac:#2563eb;--bd:#d9dde3;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#14171b;--card:#1e2329;--tx:#eceff3;--mut:#98a2b0;--ac:#6ea0ff;--bd:#343b44}}
-:root[data-theme="dark"]{--bg:#14171b;--card:#1e2329;--tx:#eceff3;--mut:#98a2b0;--ac:#6ea0ff;--bd:#343b44}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
-main{max-width:920px;margin:0 auto;padding:16px}h1{font-size:1.4rem;margin:.2em 0}p.s,.msg{color:var(--mut);font-size:.9rem;margin:4px 0 12px}
-.box{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:14px;margin-bottom:14px}
+:root{--bg:#eef2f8;--card:#fff;--tx:#14213d;--mut:#5f6c85;--ac:#1d4ed8;--bd:#d6dded;--nv:#0e2a5c;--sh:0 2px 10px rgba(15,42,90,.09);box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);background:var(--nv)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0b1220;--card:#152036;--tx:#e8edf8;--mut:#93a0ba;--ac:#6aa0ff;--bd:#2a3856;--sh:none}}
+:root[data-theme="dark"]{--bg:#0b1220;--card:#152036;--tx:#e8edf8;--mut:#93a0ba;--ac:#6aa0ff;--bd:#2a3856;--sh:none}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans Devanagari",sans-serif;min-height:100vh}
+header{display:flex;align-items:center;gap:12px;padding:12px 16px;background:linear-gradient(135deg,#0e2a5c,#1f5a9a);color:#fff}
+header img{width:46px;height:46px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.35)}
+header div{flex:1;line-height:1.2}header b{font-size:1.3rem;letter-spacing:.3px}header small{display:block;opacity:.8;font-size:.78rem;margin-top:2px}
+.tri{display:block;height:4px;background:linear-gradient(90deg,#ff9933 33.3%,#fff 33.3% 66.6%,#138808 66.6%)}
+main{max-width:920px;margin:0 auto;padding:16px}p.s,.msg{color:var(--mut);font-size:.9rem;margin:4px 0 12px}
+.box{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:14px;margin-bottom:14px;box-shadow:var(--sh)}
 .row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
-button,select,input[type=password]{font:inherit;padding:8px 12px;border-radius:9px;border:1px solid var(--bd);background:var(--card);color:var(--tx)}
-button.p{background:var(--ac);color:#fff;border-color:var(--ac)}button:disabled{opacity:.45}
-label{color:var(--mut);font-size:.9rem}
-#drop{border:2px dashed var(--bd);border-radius:12px;padding:24px;text-align:center;color:var(--mut);cursor:pointer}
+button,select,input[type=password]{font:inherit;padding:9px 13px;border-radius:10px;border:1px solid var(--bd);background:var(--card);color:var(--tx)}
+button{font-weight:600;cursor:pointer;color:var(--ac);border-color:var(--ac);background:transparent}
+button:active{transform:scale(.97)}button:disabled{opacity:.45}
+button.p{background:linear-gradient(135deg,#1d4ed8,#2f6bf0);color:#fff;border:0}
+button.g{background:linear-gradient(135deg,#138808,#22a517);color:#fff;border:0;box-shadow:0 2px 6px rgba(19,136,8,.3)}
+button.gh{background:rgba(255,255,255,.14);color:#fff;border:1px solid rgba(255,255,255,.4)}
+label{color:var(--mut);font-size:.9rem}input[type=range]{accent-color:#ff9933}input[type=checkbox]{accent-color:#138808}
+#drop{border:2px dashed #ff9933;border-radius:14px;padding:26px;text-align:center;color:var(--tx);cursor:pointer;background:linear-gradient(180deg,rgba(255,153,51,.08),rgba(19,136,8,.06));font-weight:600}
 #grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin-top:10px}
-.cd{border:2px solid var(--bd);border-radius:10px;padding:6px;cursor:pointer;background:var(--card)}.cd.on{border-color:var(--ac)}
+.cd{border:2px solid var(--bd);border-radius:12px;padding:6px;cursor:pointer;background:var(--card)}.cd.on{border-color:#ff9933;box-shadow:0 0 0 3px rgba(255,153,51,.25)}
 .cd canvas{width:100%;height:auto;display:block;margin-top:4px;border-radius:6px;background:#8884}
 .cd span{font-size:.8rem;color:var(--mut);word-break:break-all}
 #stage{position:relative;display:inline-block;max-width:100%;line-height:0}
 #pg{max-width:100%;height:auto;border:1px solid var(--bd);background:#fff}
-#cr{touch-action:none;position:absolute;border:2px solid var(--ac);box-shadow:0 0 0 9999px rgba(0,0,0,.45);cursor:move}
-.h{position:absolute;width:22px;height:22px;background:var(--ac);border-radius:50%;border:2px solid #fff}
+#cr{touch-action:none;position:absolute;border:2px solid #ff9933;box-shadow:0 0 0 9999px rgba(8,20,48,.55);cursor:move}
+.h{position:absolute;width:22px;height:22px;background:#ff9933;border-radius:50%;border:2px solid #fff}
 .h[data-h=nw]{left:-11px;top:-11px;cursor:nwse-resize}.h[data-h=ne]{right:-11px;top:-11px;cursor:nesw-resize}
 .h[data-h=sw]{left:-11px;bottom:-11px;cursor:nesw-resize}.h[data-h=se]{right:-11px;bottom:-11px;cursor:nwse-resize}
 .wrap{overflow:auto;text-align:center}
+#bye{position:fixed;inset:0;z-index:99;background:linear-gradient(160deg,#0e2a5c,#1f5a9a);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:6px;padding:24px}
+#bye[hidden]{display:none}
+.fl{width:150px;height:100px;border-radius:6px;background:linear-gradient(#ff9933 33.3%,#fff 33.3% 66.6%,#138808 66.6%);position:relative;box-shadow:0 6px 18px rgba(0,0,0,.4);margin-bottom:14px}
+.fl:before{content:"";position:absolute;left:50%;top:50%;width:30px;height:30px;margin:-15px;border-radius:50%;border:2px solid #000080;background:repeating-conic-gradient(#000080 0 1.5deg,transparent 1.5deg 15deg)}
+#bye h2{font-size:2.6rem;margin:0;color:#ffb866}#bye p{margin:2px 0;font-size:1.05rem}#bye small{opacity:.8}
 </style>
 </head>
 <body>
+<header><img src="icon-192.png" alt=""><div><b>PDFCrop</b><small>ID card cropper · PVC size 85.6 × 54 mm</small></div><button class="gh" id="xit">Exit</button></header><i class="tri"></i>
 <main>
-<h1>PdfCrop</h1>
 <p class="s">Cards from Aadhaar, PAN, Voter ID, Ayushman and more. Cropped in your browser at PVC size (85.6 × 54 mm). Nothing is uploaded.</p>
 
 <div class="box">
@@ -60,14 +74,15 @@ label{color:var(--mut);font-size:.9rem}
 
 <div class="box" id="ex" hidden>
 <div class="row">
-<button class="p" id="sj">Save selected as JPEG</button>
-<button class="p" id="sp">Save selected as PDF</button><button class="p" id="sz">Save JPEGs as ZIP</button>
+<button class="p g" id="sj">Save selected as JPEG</button>
+<button class="p g" id="sp">Save selected as PDF</button><button class="p g" id="sz">Save JPEGs as ZIP</button>
 <label>PDF <select id="pm"><option value="one">One file (1 card per page)</option><option value="sep">Separate files</option></select></label>
 </div>
 <div class="msg" id="st"></div>
 </div>
 </main>
 
+<div id="bye" hidden><div class="fl"></div><h2>जय हिंद</h2><p>Developed by Prakash Pawar</p><small>Ver 1.0</small></div>
 <script src="lib/pdf.min.js"></script>
 <script src="lib/jspdf.umd.min.js"></script>
 <script src="lib/jszip.min.js"></script>
@@ -270,28 +285,38 @@ async function save(name,data){
 const sel=()=>cards.filter(c=>c.cb.checked);
 async function guard(fn){
   if(!sel().length){$('st').textContent='Select at least one card.';return}
-  try{await fn();$('st').textContent='Done.'}
+  try{$('st').textContent=(await fn())||'Done.'}
   catch(e){$('st').textContent=e&&e.code==='declined'?'Save cancelled.':'Error: '+((e&&e.message)||e)}
 }
 const native=()=>!!(window.Capacitor&&Capacitor.isNativePlatform&&Capacitor.isNativePlatform());
 const b64=b=>new Promise(r=>{const f=new FileReader();f.onload=()=>r(f.result.split(',')[1]);f.readAsDataURL(b)});
+const MIME={jpg:'image/jpeg',pdf:'application/pdf',zip:'application/zip'};
 async function saveAll(list){
-  if(native()){const P=Capacitor.Plugins,uris=[];
-    for(const[n,b]of list){const r=await P.Filesystem.writeFile({path:'PdfCrop/'+n,data:await b64(b),directory:'CACHE',recursive:true});uris.push(r.uri)}
-    await P.Share.share({title:'PdfCrop',files:uris,dialogTitle:'Save or share cards'});return}
+  if(native()){const DS=Capacitor.registerPlugin('DownloadSaver');
+    for(const[n,b]of list)await DS.save({name:n,data:await b64(b),mime:MIME[n.split('.').pop()]||b.type});
+    return 'Saved '+list.length+' file(s) to Download/PDFCrop'}
   for(const[n,b]of list)await save(n,b);
 }
 $('sj').onclick=()=>guard(async()=>{const L=[];
   for(const c of sel()){const o=render(c,+$('dpi').value);L.push([c.name+'.jpg',await new Promise(r=>o.toBlob(r,'image/jpeg',.95))])}
-  await saveAll(L)});
+  return await saveAll(L)});
 $('sz').onclick=()=>guard(async()=>{const z=new JSZip();
   for(const c of sel()){const o=render(c,+$('dpi').value);z.file(c.name+'.jpg',await new Promise(r=>o.toBlob(r,'image/jpeg',.95)))}
-  await saveAll([['cards.zip',await z.generateAsync({type:'blob'})]])});
+  return await saveAll([['cards.zip',await z.generateAsync({type:'blob'})]])});
 $('sp').onclick=()=>guard(async()=>{
   const dpi=+$('dpi').value,mk=()=>new jspdf.jsPDF({orientation:'landscape',unit:'mm',format:[CW,CH]});
   const add=(p,c)=>p.addImage(render(c,dpi).toDataURL('image/jpeg',.95),'JPEG',0,0,CW,CH);
-  if($('pm').value==='one'){const p=mk();sel().forEach((c,i)=>{if(i)p.addPage([CW,CH],'landscape');add(p,c)});await saveAll([['cards.pdf',p.output('blob')]])}
-  else{const L=[];for(const c of sel()){const p=mk();add(p,c);L.push([c.name+'.pdf',p.output('blob')])}await saveAll(L)}});
+  if($('pm').value==='one'){const p=mk();sel().forEach((c,i)=>{if(i)p.addPage([CW,CH],'landscape');add(p,c)});return await saveAll([['cards.pdf',p.output('blob')]])}
+  else{const L=[];for(const c of sel()){const p=mk();add(p,c);L.push([c.name+'.pdf',p.output('blob')])}return await saveAll(L)}});
+/* ---- exit message ---- */
+let leaving=false;
+function bye(){
+  if(leaving)return;leaving=true;$('bye').hidden=false;
+  setTimeout(()=>{leaving=false;
+    if(native())Capacitor.registerPlugin('App').exitApp();else $('bye').hidden=true},2800);
+}
+$('xit').onclick=bye;
+if(native())Capacitor.registerPlugin('App').addListener('backButton',bye);
 </script>
 </body>
 </html>
