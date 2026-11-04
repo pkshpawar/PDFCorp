@@ -1,0 +1,68 @@
+name: Build APK
+
+on:
+  push:
+    branches: [main, master]
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Bundle JS libraries (so the app works offline)
+        run: |
+          mkdir -p www/lib
+          B=https://cdnjs.cloudflare.com/ajax/libs
+          curl -fL -o www/lib/pdf.min.js         $B/pdf.js/3.11.174/pdf.min.js
+          curl -fL -o www/lib/pdf.worker.min.js  $B/pdf.js/3.11.174/pdf.worker.min.js
+          curl -fL -o www/lib/jspdf.umd.min.js   $B/jspdf/2.5.1/jspdf.umd.min.js
+          curl -fL -o www/lib/jszip.min.js       $B/jszip/3.10.1/jszip.min.js
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Add Android platform
+        run: npx cap add android
+
+      - name: Generate app icons
+        continue-on-error: true
+        run: npx @capacitor/assets generate --android --iconBackgroundColor '#2563eb' --iconBackgroundColorDark '#2563eb'
+
+      - name: Sync web app into Android project
+        run: npx cap sync android
+
+      - name: Build debug APK
+        working-directory: android
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleDebug
+
+      - name: Rename APK
+        run: cp android/app/build/outputs/apk/debug/app-debug.apk PdfCrop.apk
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: PdfCrop-apk
+          path: PdfCrop.apk
+
+      - name: Attach APK to GitHub Release (tags only)
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: PdfCrop.apk
