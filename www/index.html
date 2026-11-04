@@ -6,30 +6,40 @@
 <title>PDFCrop – PVC Card Cropper</title>
 <link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#0e2a5c"><link rel="icon" href="icon-192.png"><link rel="apple-touch-icon" href="icon-192.png">
 <style>
-:root{--bg:#eef2f8;--card:#fff;--tx:#14213d;--mut:#5f6c85;--ac:#1d4ed8;--bd:#d6dded;--nv:#0e2a5c;--sh:0 2px 10px rgba(15,42,90,.09);box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);background:var(--nv)}
+:root{--bg:#eaf0fa;--card:#fff;--tx:#14213d;--mut:#5f6c85;--ac:#1d4ed8;--bd:#d6dded;--nv:#0e2a5c;--sh:0 1px 6px rgba(15,42,90,.1);box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);background:var(--nv)}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0b1220;--card:#152036;--tx:#e8edf8;--mut:#93a0ba;--ac:#6aa0ff;--bd:#2a3856;--sh:none}}
 :root[data-theme="dark"]{--bg:#0b1220;--card:#152036;--tx:#e8edf8;--mut:#93a0ba;--ac:#6aa0ff;--bd:#2a3856;--sh:none}
 *{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
-body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans Devanagari",sans-serif;min-height:100vh}
-header{display:flex;align-items:center;gap:12px;padding:12px 16px;background:linear-gradient(135deg,#0e2a5c,#1f5a9a);color:#fff}
-header img{width:46px;height:46px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.35)}
-header div{flex:1;line-height:1.2}header b{font-size:1.3rem;letter-spacing:.3px}header small{display:block;opacity:.8;font-size:.78rem;margin-top:2px}
-.tri{display:block;height:4px;background:linear-gradient(90deg,#ff9933 33.3%,#fff 33.3% 66.6%,#138808 66.6%)}
-main{max-width:920px;margin:0 auto;padding:16px}p.s,.msg{color:var(--mut);font-size:.9rem;margin:4px 0 12px}
-.box{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:14px;margin-bottom:14px;box-shadow:var(--sh)}
-.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
-button,select,input[type=password]{font:inherit;padding:9px 13px;border-radius:10px;border:1px solid var(--bd);background:var(--card);color:var(--tx)}
-button{font-weight:600;cursor:pointer;color:var(--ac);border-color:var(--ac);background:transparent}
-button:active{transform:scale(.97)}button:disabled{opacity:.45}
-button.p{background:linear-gradient(135deg,#1d4ed8,#2f6bf0);color:#fff;border:0}
-button.g{background:linear-gradient(135deg,#138808,#22a517);color:#fff;border:0;box-shadow:0 2px 6px rgba(19,136,8,.3)}
-button.gh{background:rgba(255,255,255,.14);color:#fff;border:1px solid rgba(255,255,255,.4)}
-label{color:var(--mut);font-size:.9rem}input[type=range]{accent-color:#ff9933}input[type=checkbox]{accent-color:#138808}
-#drop{border:2px dashed #ff9933;border-radius:14px;padding:26px;text-align:center;color:var(--tx);cursor:pointer;background:linear-gradient(180deg,rgba(255,153,51,.08),rgba(19,136,8,.06));font-weight:600}
-#grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin-top:10px}
-.cd{border:2px solid var(--bd);border-radius:12px;padding:6px;cursor:pointer;background:var(--card)}.cd.on{border-color:#ff9933;box-shadow:0 0 0 3px rgba(255,153,51,.25)}
-.cd canvas{width:100%;height:auto;display:block;margin-top:4px;border-radius:6px;background:#8884}
-.cd span{font-size:.8rem;color:var(--mut);word-break:break-all}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.35 system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans Devanagari",sans-serif;min-height:100vh}
+header{display:flex;align-items:center;gap:10px;padding:7px 12px;background:linear-gradient(135deg,#0e2a5c,#1f5a9a);color:#fff}
+header img{width:36px;height:36px;border-radius:9px;box-shadow:0 1px 6px rgba(0,0,0,.35)}
+header div{flex:1;line-height:1.15}header b{font-size:1.1rem;letter-spacing:.3px}header small{display:block;opacity:.8;font-size:.7rem}
+.tri{display:block;height:3px;background:linear-gradient(90deg,#ff9933 33.3%,#fff 33.3% 66.6%,#138808 66.6%)}
+main{max-width:920px;margin:0 auto;padding:10px}.msg{color:var(--mut);font-size:.78rem;margin:3px 0}
+.box{background:var(--card);border:1px solid var(--bd);border-left:4px solid var(--bc,#ff9933);border-radius:11px;padding:9px 10px;margin-bottom:9px;box-shadow:var(--sh)}
+#ub{--bc:#ff9933}#cbox{--bc:#1d4ed8}#ed{--bc:#138808}#ex{--bc:#7c3aed}
+.row{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.nw{display:flex;flex-wrap:nowrap;gap:6px;align-items:center;overflow-x:auto;scrollbar-width:none;margin-bottom:7px}
+.nw::-webkit-scrollbar{display:none}.nw>*{flex:none}
+.nw.fit{gap:4px}.nw.fit>*{flex:1 1 auto;min-width:0;padding:6px 3px;font-size:.68rem;text-align:center}
+button,select,input[type=password]{font:inherit;font-size:.8rem;padding:6px 10px;border-radius:8px;border:1px solid var(--bd);background:var(--card);color:var(--tx)}
+button{font-weight:600;cursor:pointer;border:0;color:#fff;background:linear-gradient(135deg,#334155,#64748b);white-space:nowrap;box-shadow:0 1px 3px rgba(0,0,0,.18)}
+button:active{transform:scale(.96)}button:disabled{opacity:.45}
+.c-blue{background:linear-gradient(135deg,#1d4ed8,#3b82f6)}.c-pur{background:linear-gradient(135deg,#6d28d9,#8b5cf6)}
+.c-grn{background:linear-gradient(135deg,#138808,#22a517)}.c-red{background:linear-gradient(135deg,#b91c1c,#ef4444)}
+.c-teal{background:linear-gradient(135deg,#0e7490,#06b6d4)}.c-org{background:linear-gradient(135deg,#ea580c,#ff9933)}
+button.gh{background:rgba(255,255,255,.16);color:#fff;border:1px solid rgba(255,255,255,.4);box-shadow:none}
+#cands{display:flex;flex-wrap:nowrap;gap:6px}
+#cands button{background:#fff3e6;color:#c2410c;border:1px solid #ff9933;box-shadow:none}
+label{color:var(--mut);font-size:.78rem;display:inline-flex;align-items:center;gap:4px}
+input[type=range]{accent-color:#ff9933;width:80px}input[type=checkbox]{accent-color:#138808}
+#zl{min-width:34px}
+#drop{border:2px dashed #ff9933;border-radius:11px;padding:14px 10px;text-align:center;color:var(--tx);cursor:pointer;font-weight:600;font-size:.9rem;background:linear-gradient(180deg,rgba(255,153,51,.1),rgba(19,136,8,.07))}
+#pw{width:190px;max-width:100%}
+#grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin-top:8px}
+.cd{border:2px solid var(--bd);border-radius:10px;padding:4px 5px;cursor:pointer;background:var(--card)}.cd.on{border-color:#ff9933;box-shadow:0 0 0 3px rgba(255,153,51,.25)}
+.cd canvas{width:100%;height:auto;display:block;margin-top:3px;border-radius:6px;background:#8884}
+.cd span{font-size:.72rem;color:var(--mut);word-break:break-all}
 #stage{position:relative;display:block;width:max-content;margin:0 auto;line-height:0}
 #pg{max-width:100%;height:auto;border:1px solid var(--bd);background:#fff}
 #cr{touch-action:none;position:absolute;border:2px solid #ff9933;box-shadow:0 0 0 9999px rgba(8,20,48,.55);cursor:move}
@@ -45,38 +55,34 @@ label{color:var(--mut);font-size:.9rem}input[type=range]{accent-color:#ff9933}in
 </style>
 </head>
 <body>
-<header><img src="icon-192.png" alt=""><div><b>PDFCrop</b><small>ID card cropper · PVC 85.6 × 54 mm · v1.0 build <span id="bn">__BUILD__</span></small></div><button class="gh" id="xit">Exit</button></header><i class="tri"></i>
+<header><img src="icon-192.png" alt=""><div><b>PDFCrop</b><small>PVC card cropper · v1.0 build <span id="bn">__BUILD__</span></small></div><button class="gh" id="xit">Exit</button></header><i class="tri"></i>
 <main>
-<p class="s">Cards from Aadhaar, PAN, Voter ID, Ayushman and more. Cropped in your browser at PVC size (85.6 × 54 mm). Nothing is uploaded.</p>
 
-<div class="box">
+<div class="box" id="ub">
 <div id="drop">Tap to choose one or many PDFs / images (or drop them here)</div>
 <input id="f" type="file" accept="application/pdf,image/*" multiple hidden>
-<div class="row" style="margin-top:10px"><input id="pw" type="password" placeholder="PDF password (if any)"><span class="msg" style="margin:0">Aadhaar: first 4 letters of name (CAPS) + birth year</span></div>
+<div class="row" style="margin-top:7px"><input id="pw" type="password" placeholder="Enter PDF password"><span class="msg" style="margin:0">Password needed only if your PDF is locked (encrypted)</span></div>
 <div class="msg" id="pst"></div>
 </div>
 
 <div class="box" id="cbox" hidden>
-<div class="row">
-<label>Quality <select id="dpi"><option value="300">300 dpi</option><option value="600">600 dpi</option><option value="200">200 dpi</option></select></label>
-</div>
-<div class="row" style="margin-top:10px"><button id="all">Select all</button><button id="none">Select none</button><span class="msg" id="cnt" style="margin:0"></span></div>
+<div class="nw" style="margin-bottom:0"><label>Quality <select id="dpi"><option value="300">300 dpi</option><option value="600">600 dpi</option><option value="200">200 dpi</option></select></label><button class="c-teal" id="all">Select all</button><button id="none">Select none</button><span class="msg" id="cnt" style="margin:0"></span></div>
 <div id="grid"></div>
-<div class="msg">Tick the cards to export. Tap a card to adjust its crop.</div>
+<div class="msg">Tick cards to export. Tap a card to adjust its crop.</div>
 </div>
 
 <div class="box" id="ed" hidden>
-<div class="row" style="margin-bottom:10px"><button id="pvc">PVC card ratio</button><button id="trim">Trim border</button><button id="addc">+ Add card on this page</button><button id="delc">Remove card</button><span class="row"><button id="zo" title="Zoom out">−</button><button id="zi" title="Zoom in">+</button><button id="zf">Fit</button><span id="zl" class="msg" style="margin:0">100%</span></span><span id="cands" class="row"></span></div>
-<div class="row" style="margin-bottom:10px"><label>Corners <select id="cor"><option value="sharp">Sharp</option><option value="round">Rounded</option></select></label><label>Fit <select id="fit"><option value="auto">Auto</option><option value="stretch">Stretch to card</option><option value="contain">Keep proportions (white bars)</option><option value="cover">Fill, crop overflow</option></select></label><label>Inset <input type="range" id="ins" min="0" max="8" step="0.5" value="1.5"> <span id="iv">1.5%</span></label><button id="appl">Apply to all ticked cards</button></div>
+<div class="nw fit"><button class="c-blue" id="pvc">PVC card ratio</button><button class="c-pur" id="trim">Trim border</button><button class="c-grn" id="addc">+ Add card</button><button class="c-red" id="delc">Remove card</button></div>
+<div class="nw"><button class="c-teal" id="zo" title="Zoom out">−</button><button class="c-teal" id="zi" title="Zoom in">+</button><button class="c-teal" id="zf">Fit</button><span id="zl" class="msg" style="margin:0">100%</span><span id="cands"></span></div>
+<div class="row" style="margin-bottom:7px"><label>Corners <select id="cor"><option value="sharp">Sharp</option><option value="round">Rounded</option></select></label><label>Fit <select id="fit"><option value="auto">Auto</option><option value="stretch">Stretch</option><option value="contain">Keep ratio</option><option value="cover">Fill &amp; crop</option></select></label><label>Inset <input type="range" id="ins" min="0" max="8" step="0.5" value="1.5"> <span id="iv">1.5%</span></label><button class="c-org" id="appl">Apply to ticked</button></div>
 <div class="wrap" id="wz"><div id="stage"><canvas id="pg"></canvas><div id="cr"><i class="h" data-h="nw"></i><i class="h" data-h="ne"></i><i class="h" data-h="sw"></i><i class="h" data-h="se"></i></div></div></div>
-<div class="row" style="margin-top:8px"><label><input type="checkbox" id="lock"> Lock ratio</label><span id="rd" class="msg" style="margin:0"></span><span class="msg" style="margin:0">Drag box to move, corners to resize. Pinch with two fingers to zoom.</span></div>
+<div class="row" style="margin-top:6px"><label><input type="checkbox" id="lock"> Lock ratio</label><span id="rd" class="msg" style="margin:0"></span><span class="msg" style="margin:0">Drag box · corners resize · pinch to zoom</span></div>
 </div>
 
 <div class="box" id="ex" hidden>
 <div class="row">
-<button class="p g" id="sj">Save selected as JPEG</button>
-<button class="p g" id="sp">Save selected as PDF</button><button class="p g" id="sz">Save JPEGs as ZIP</button>
-<label>PDF <select id="pm"><option value="one">One file (1 card per page)</option><option value="sep">Separate files</option></select></label>
+<button class="c-org" id="sj">Save JPEG</button><button class="c-blue" id="sp">Save PDF</button><button class="c-grn" id="sz">JPEGs as ZIP</button>
+<label>PDF <select id="pm"><option value="one">One file</option><option value="sep">Separate files</option></select></label>
 </div>
 <div class="msg" id="st"></div>
 </div>
