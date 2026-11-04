@@ -6,6 +6,8 @@ import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.Looper;
 import android.provider.MediaStore;
 import android.util.Base64;
 
@@ -53,5 +55,15 @@ public class DownloadSaverPlugin extends Plugin {
         } catch (Exception e) {
             call.reject(e.getMessage() == null ? "Save failed" : e.getMessage());
         }
+    }
+
+    /** Fully closes the app (task removed + process ended). */
+    @PluginMethod
+    public void exit(PluginCall call) {
+        call.resolve();
+        getActivity().runOnUiThread(() -> {
+            getActivity().finishAndRemoveTask();
+            new Handler(Looper.getMainLooper()).postDelayed(() -> System.exit(0), 300);
+        });
     }
 }

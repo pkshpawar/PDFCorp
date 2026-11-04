@@ -17,9 +17,9 @@ On Android 9 or older, allow Storage permission for the app in Settings if savin
 For many cards use **Save JPEGs as ZIP** or the single multi-page **PDF**.
 
 ## Exit message
-Pressing Back (or the Exit button) shows the "जय हिंद" screen with the flag, *Developed by Prakash Pawar* and *Ver 1.0*, then closes the app.
+Pressing Back (or the Exit button) shows for 2 seconds the "जय हिंद" screen with the flag, *Developed by Prakash Pawar* and *Ver 1.0*, then the app closes completely.
 
 ## Notes
 - This builds a *debug* APK, which installs fine for personal use. For Play Store you need a signed release build.
-- Folder: `www/` = the web app, `capacitor.config.json` = app id/name, `assets/icon-only.png` = launcher icon, `native/` = Android code for saving to Download/PDFCrop.
+- Folder: `www/` = the web app, `capacitor.config.json` = app id/name, `assets/icon-only.png` = launcher icon, `native/` = Android code (saving to Download/PDFCrop, exit, launcher icons in `native/res`).
 - Build locally instead: `npm install`, download the 4 libs into `www/lib` (see the workflow), `npx cap add android`, `npx cap sync android`, then build in Android Studio.
