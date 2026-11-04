@@ -1,0 +1,6 @@
+{
+  "appId": "com.pdfcrop.app",
+  "appName": "PdfCrop",
+  "webDir": "www",
+  "android": { "allowMixedContent": false }
+}

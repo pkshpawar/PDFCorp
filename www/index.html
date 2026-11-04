@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PdfCrop – PVC Card Cropper</title>
+<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#2563eb"><link rel="icon" href="icon-192.png"><link rel="apple-touch-icon" href="icon-192.png">
+<style>
+:root{--bg:#f6f7f9;--card:#fff;--tx:#1b1f24;--mut:#6a7380;--ac:#2563eb;--bd:#d9dde3;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#14171b;--card:#1e2329;--tx:#eceff3;--mut:#98a2b0;--ac:#6ea0ff;--bd:#343b44}}
+:root[data-theme="dark"]{--bg:#14171b;--card:#1e2329;--tx:#eceff3;--mut:#98a2b0;--ac:#6ea0ff;--bd:#343b44}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:920px;margin:0 auto;padding:16px}h1{font-size:1.4rem;margin:.2em 0}p.s,.msg{color:var(--mut);font-size:.9rem;margin:4px 0 12px}
+.box{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:14px;margin-bottom:14px}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+button,select,input[type=password]{font:inherit;padding:8px 12px;border-radius:9px;border:1px solid var(--bd);background:var(--card);color:var(--tx)}
+button.p{background:var(--ac);color:#fff;border-color:var(--ac)}button:disabled{opacity:.45}
+label{color:var(--mut);font-size:.9rem}
+#drop{border:2px dashed var(--bd);border-radius:12px;padding:24px;text-align:center;color:var(--mut);cursor:pointer}
+#grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin-top:10px}
+.cd{border:2px solid var(--bd);border-radius:10px;padding:6px;cursor:pointer;background:var(--card)}.cd.on{border-color:var(--ac)}
+.cd canvas{width:100%;height:auto;display:block;margin-top:4px;border-radius:6px;background:#8884}
+.cd span{font-size:.8rem;color:var(--mut);word-break:break-all}
+#stage{position:relative;display:inline-block;max-width:100%;line-height:0}
+#pg{max-width:100%;height:auto;border:1px solid var(--bd);background:#fff}
+#cr{touch-action:none;position:absolute;border:2px solid var(--ac);box-shadow:0 0 0 9999px rgba(0,0,0,.45);cursor:move}
+.h{position:absolute;width:22px;height:22px;background:var(--ac);border-radius:50%;border:2px solid #fff}
+.h[data-h=nw]{left:-11px;top:-11px;cursor:nwse-resize}.h[data-h=ne]{right:-11px;top:-11px;cursor:nesw-resize}
+.h[data-h=sw]{left:-11px;bottom:-11px;cursor:nesw-resize}.h[data-h=se]{right:-11px;bottom:-11px;cursor:nwse-resize}
+.wrap{overflow:auto;text-align:center}
+</style>
+</head>
+<body>
+<main>
+<h1>PdfCrop</h1>
+<p class="s">Cards from Aadhaar, PAN, Voter ID, Ayushman and more. Cropped in your browser at PVC size (85.6 × 54 mm). Nothing is uploaded.</p>
+
+<div class="box">
+<div id="drop">Tap to choose one or many PDFs / images (or drop them here)</div>
+<input id="f" type="file" accept="application/pdf,image/*" multiple hidden>
+<div class="row" style="margin-top:10px"><input id="pw" type="password" placeholder="PDF password (if any)"><span class="msg" style="margin:0">Aadhaar: first 4 letters of name (CAPS) + birth year</span></div>
+<div class="msg" id="pst"></div>
+</div>
+
+<div class="box" id="cbox" hidden>
+<div class="row">
+<label>Quality <select id="dpi"><option value="300">300 dpi</option><option value="600">600 dpi</option><option value="200">200 dpi</option></select></label>
+</div>
+<div class="row" style="margin-top:10px"><button id="all">Select all</button><button id="none">Select none</button><span class="msg" id="cnt" style="margin:0"></span></div>
+<div id="grid"></div>
+<div class="msg">Tick the cards to export. Tap a card to adjust its crop.</div>
+</div>
+
+<div class="box" id="ed" hidden>
+<div class="row" style="margin-bottom:10px"><button id="pvc">PVC card ratio</button><button id="trim">Trim border</button><button id="addc">+ Add card on this page</button><button id="delc">Remove card</button><span id="cands" class="row"></span></div>
+<div class="row" style="margin-bottom:10px"><label>Corners <select id="cor"><option value="sharp">Sharp</option><option value="round">Rounded</option></select></label><label>Fit <select id="fit"><option value="auto">Auto</option><option value="stretch">Stretch to card</option><option value="contain">Keep proportions (white bars)</option><option value="cover">Fill, crop overflow</option></select></label><label>Inset <input type="range" id="ins" min="0" max="8" step="0.5" value="1.5"> <span id="iv">1.5%</span></label><button id="appl">Apply to all ticked cards</button></div>
+<div class="wrap"><div id="stage"><canvas id="pg"></canvas><div id="cr"><i class="h" data-h="nw"></i><i class="h" data-h="ne"></i><i class="h" data-h="sw"></i><i class="h" data-h="se"></i></div></div></div>
+<div class="row" style="margin-top:8px"><label><input type="checkbox" id="lock"> Lock ratio</label><span id="rd" class="msg" style="margin:0"></span><span class="msg" style="margin:0">Drag box to move, corners to resize.</span></div>
+</div>
+
+<div class="box" id="ex" hidden>
+<div class="row">
+<button class="p" id="sj">Save selected as JPEG</button>
+<button class="p" id="sp">Save selected as PDF</button><button class="p" id="sz">Save JPEGs as ZIP</button>
+<label>PDF <select id="pm"><option value="one">One file (1 card per page)</option><option value="sep">Separate files</option></select></label>
+</div>
+<div class="msg" id="st"></div>
+</div>
+</main>
+
+<script src="lib/pdf.min.js"></script>
+<script src="lib/jspdf.umd.min.js"></script>
+<script src="lib/jszip.min.js"></script>
+<script>
+var LOCAL_PDF=!!window.pdfjsLib;
+if(!window.pdfjsLib)document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"><\/script>');
+if(!window.JSZip)document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"><\/script>');
+if(!window.jspdf)document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"><\/script>');
+</script>
+<script>
+const $=id=>document.getElementById(id);
+const CW=85.6,CH=54,R=CW/CH;
+let cards=[],cur=null,dl=null;const pg=$('pg'),cr=$('cr');
+pdfjsLib.GlobalWorkerOptions.workerSrc=LOCAL_PDF?'lib/pdf.worker.min.js':'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+if('serviceWorker' in navigator&&location.protocol.indexOf('http')===0&&!window.Capacitor)navigator.serviceWorker.register('sw.js').catch(()=>{});
+try{if(window.claude&&claude.use)claude.use('downloads').then(d=>{dl=d}).catch(()=>{})}catch(e){}
+
+$('drop').onclick=()=>$('f').click();
+$('drop').ondragover=e=>e.preventDefault();
+$('drop').ondrop=e=>{e.preventDefault();run([...e.dataTransfer.files])};
+$('f').onchange=e=>{run([...e.target.files]);e.target.value=''};
+
+async function run(files){
+  for(const f of files){
+    try{
+      if(f.type.startsWith('image/')){
+        const im=await createImageBitmap(f),c=document.createElement('canvas');
+        c.width=im.width;c.height=im.height;c.getContext('2d').drawImage(im,0,0);
+        addPage(c,f.name,1);
+      }else{
+        const task=pdfjsLib.getDocument({data:await f.arrayBuffer()});
+        task.onPassword=(cb,why)=>{const p=$('pw').value||prompt((why===2?'Wrong password. ':'')+'Password for '+f.name+':');if(p===null)return;cb(p)};
+        const doc=await task.promise;
+        for(let i=1;i<=doc.numPages;i++){
+          $('pst').textContent='Reading '+f.name+' – page '+i+'/'+doc.numPages+'…';
+          const p=await doc.getPage(i),b=p.getViewport({scale:1}),vp=p.getViewport({scale:Math.min(4,2400/b.width)});
+          const c=document.createElement('canvas');c.width=vp.width;c.height=vp.height;
+          await p.render({canvasContext:c.getContext('2d'),viewport:vp}).promise;
+          addPage(c,f.name,i);
+        }
+      }
+    }catch(e){$('pst').textContent='Could not open '+f.name+': '+(e.message||e)}
+  }
+  $('pst').textContent=cards.length+' card(s) ready.';
+}
+function addPage(canvas,name,n){
+  const page={canvas,boxes:detect(canvas)};
+  const good=page.boxes.filter(b=>b.s<.1).slice(0,8).sort((a,b)=>Math.abs(a.y-b.y)>Math.min(a.h,b.h)*.5?a.y-b.y:a.x-b.x);
+  const list=good.length?good:(page.boxes.length?[page.boxes[0]]:[{x:canvas.width*.1,y:canvas.height*.1,w:canvas.width*.8,h:canvas.width*.8/R}]);
+  list.forEach(b=>newCard(page,pvcIn(trim(canvas,b)),name.replace(/\.[^.]+$/,'')+'_p'+n));
+}
+function newCard(page,rect,base){
+  const k=cards.filter(c=>c.page===page).length+1,c={page,rect,name:base+'_'+k,cor:'sharp',fit:'auto',ins:1.5};
+  const d=document.createElement('div');d.className='cd';
+  const l=document.createElement('label'),cb=document.createElement('input'),sp=document.createElement('span');
+  cb.type='checkbox';cb.checked=true;sp.textContent=' '+c.name;l.append(cb,sp);
+  c.th=document.createElement('canvas');d.append(l,c.th);
+  d.onclick=e=>{if(e.target!==cb)edit(c)};cb.onchange=count;
+  c.el=d;c.cb=cb;cards.push(c);$('grid').append(d);thumb(c);
+  ['cbox','ex'].forEach(i=>$(i).hidden=false);count();
+  if(!cur)edit(c);
+  return c;
+}
+function count(){$('cnt').textContent=cards.filter(c=>c.cb.checked).length+' of '+cards.length+' selected'}
+$('all').onclick=()=>{cards.forEach(c=>c.cb.checked=true);count()};
+$('none').onclick=()=>{cards.forEach(c=>c.cb.checked=false);count()};
+
+/* ---- find cards on a page: solid colour blocks + whitespace cuts, ranked by card aspect ---- */
+const AS=b=>Math.abs(Math.log(((b[2]-b[0])/(b[3]-b[1]))/R));
+function tight(m,W,r){let x0=1e9,y0=1e9,x1=-1,y1=-1;
+  for(let y=r[1];y<r[3];y++)for(let x=r[0];x<r[2];x++)if(m[y*W+x]){if(x<x0)x0=x;if(x>x1)x1=x;if(y<y0)y0=y;if(y>y1)y1=y}
+  return x1<0?null:[x0,y0,x1+1,y1+1]}
+const area=L=>L.reduce((s,l)=>s+(l[2]-l[0])*(l[3]-l[1]),0);
+function cuts(m,W,r,dep){
+  r=tight(m,W,r);if(!r||r[2]-r[0]<30||r[3]-r[1]<20)return[];
+  if(AS(r)<.08)return[r];if(dep>=2)return[];
+  let best=[];
+  for(const ax of [0,1]){
+    const n=ax?r[2]-r[0]:r[3]-r[1],len=ax?r[3]-r[1]:r[2]-r[0],cnt=new Array(n).fill(0);
+    for(let y=r[1];y<r[3];y++)for(let x=r[0];x<r[2];x++)if(m[y*W+x])cnt[ax?x-r[0]:y-r[1]]++;
+    const gap=Math.max(2,Math.round(.006*n)),runs=[];let s=-1;
+    for(let i=0;i<=n;i++){const wh=i<n&&cnt[i]/len<.004;
+      if(wh&&s<0)s=i;if(!wh&&s>=0){if(i-s>=gap&&s>0&&i<n)runs.push([s,i]);s=-1}}
+    runs.sort((a,b)=>(b[1]-b[0])-(a[1]-a[0]));
+    for(const[a,b]of runs.slice(0,14)){
+      const A=ax?[r[0],r[1],r[0]+a,r[3]]:[r[0],r[1],r[2],r[1]+a],B=ax?[r[0]+b,r[1],r[2],r[3]]:[r[0],r[1]+b,r[2],r[3]];
+      const res=cuts(m,W,A,dep+1).concat(cuts(m,W,B,dep+1));
+      if(res.length>best.length||(res.length===best.length&&area(res)>area(best)))best=res}
+  }
+  return best}
+function blobs(m,w,h,e){
+  let er=m;
+  for(let n=0;n<e;n++){const o=new Uint8Array(w*h);
+    for(let y=1;y<h-1;y++)for(let x=1;x<w-1;x++){const i=y*w+x;o[i]=er[i]&er[i-1]&er[i+1]&er[i-w]&er[i+w]}er=o}
+  const seen=new Uint8Array(w*h),out=[];
+  for(let s=0;s<w*h;s++){if(!er[s]||seen[s])continue;
+    let x0=w,y0=h,x1=0,y1=0;const st=[s];seen[s]=1;
+    while(st.length){const i=st.pop(),x=i%w,y=(i/w)|0;
+      if(x<x0)x0=x;if(x>x1)x1=x;if(y<y0)y0=y;if(y>y1)y1=y;
+      for(const j of [i-1,i+1,i-w,i+w])if(j>=0&&j<w*h&&er[j]&&!seen[j]){seen[j]=1;st.push(j)}}
+    out.push([Math.max(0,x0-e),Math.max(0,y0-e),Math.min(w,x1+1+e),Math.min(h,y1+1+e)])}
+  return out}
+function detectMasks(m1,m2,w,h){
+  let all=blobs(m1,w,h,Math.max(2,Math.round(w*.012))).concat(cuts(m2,w,[0,0,w,h],0));
+  all=all.filter(b=>(b[2]-b[0])*(b[3]-b[1])>w*h*.03);
+  all.forEach(b=>b.s=AS(b));all.sort((a,b)=>a.s-b.s);
+  const keep=[];
+  for(const b of all){let ok=true;
+    for(const c of keep){const ix=Math.max(0,Math.min(b[2],c[2])-Math.max(b[0],c[0])),iy=Math.max(0,Math.min(b[3],c[3])-Math.max(b[1],c[1]));
+      if(ix*iy>.5*Math.min(area([b]),area([c])))ok=false}
+    if(ok)keep.push(b)}
+  return keep}
+function detect(src){
+  const w=300,k=src.width/w,h=Math.max(1,Math.round(src.height/k));
+  const t=document.createElement('canvas');t.width=w;t.height=h;
+  const tc=t.getContext('2d');tc.fillStyle='#fff';tc.fillRect(0,0,w,h);tc.imageSmoothingQuality='high';tc.drawImage(src,0,0,w,h);
+  const d=tc.getImageData(0,0,w,h).data,m1=new Uint8Array(w*h),m2=new Uint8Array(w*h);
+  const bg=[0,1,2].map(c=>{const v=[];for(let x=0;x<w;x++)v.push(d[x*4+c],d[((h-1)*w+x)*4+c]);
+    for(let y=0;y<h;y++)v.push(d[y*w*4+c],d[(y*w+w-1)*4+c]);v.sort((a,b)=>a-b);return v[v.length>>1]});
+  for(let i=0;i<w*h;i++){const df=Math.max(Math.abs(d[i*4]-bg[0]),Math.abs(d[i*4+1]-bg[1]),Math.abs(d[i*4+2]-bg[2]));m1[i]=df>17?1:0;m2[i]=df>6?1:0}
+  return detectMasks(m1,m2,w,h).map(b=>({x:b[0]*k,y:b[1]*k,w:(b[2]-b[0])*k,h:(b[3]-b[1])*k,s:b.s}));
+}
+/* ---- shave flat white/dark lines off each edge ---- */
+function trim(src,r){
+  const x0=Math.max(0,Math.round(r.x)),y0=Math.max(0,Math.round(r.y));
+  const w=Math.min(Math.round(r.w),src.width-x0),h=Math.min(Math.round(r.h),src.height-y0);
+  if(w<50||h<30)return r;
+  const d=src.getContext('2d').getImageData(x0,y0,w,h).data;
+  const flat=(v,i)=>{let n=0,s=0,q=0;const len=v?h:w;
+    for(let j=0;j<len;j+=2){const p=v?(j*w+i):(i*w+j),a=(d[p*4]+d[p*4+1]+d[p*4+2])/3;s+=a;q+=a*a;n++}
+    const mu=s/n;return Math.sqrt(Math.max(0,q/n-mu*mu))<14&&(mu>238||mu<60)};
+  let l=0,rr=w-1,t=0,b=h-1;const lim=Math.min(w,h)*.12;
+  while(l<lim&&flat(1,l))l++;while(w-1-rr<lim&&flat(1,rr))rr--;
+  while(t<lim&&flat(0,t))t++;while(h-1-b<lim&&flat(0,b))b--;
+  return{x:x0+l+2,y:y0+t+2,w:rr-l-4,h:b-t-4};
+}
+
+/* ---- render one card at the PVC size ---- */
+function render(c,dpi){
+  const W=Math.round(CW/25.4*dpi),H=Math.round(CH/25.4*dpi),o=document.createElement('canvas');
+  o.width=W;o.height=H;const x=o.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,W,H);x.imageSmoothingQuality='high';
+  if(c.cor==='round'){const r=3.18/25.4*dpi;
+    x.beginPath();x.moveTo(r,0);x.arcTo(W,0,W,H,r);x.arcTo(W,H,0,H,r);x.arcTo(0,H,0,0,r);x.arcTo(0,0,W,0,r);x.closePath();x.clip()}
+  const n=c.ins/100,q=c.rect,r={x:q.x+q.w*n,y:q.y+q.h*n,w:q.w*(1-2*n),h:q.h*(1-2*n)};
+  let f=c.fit;if(f==='auto')f=AS([0,0,r.w,r.h])<.08?'stretch':'contain';
+  if(f==='stretch')x.drawImage(c.page.canvas,r.x,r.y,r.w,r.h,0,0,W,H);
+  else{const s=(f==='cover'?Math.max:Math.min)(W/r.w,H/r.h),dw=r.w*s,dh=r.h*s;x.drawImage(c.page.canvas,r.x,r.y,r.w,r.h,(W-dw)/2,(H-dh)/2,dw,dh)}
+  return o;
+}
+function thumb(c){const o=render(c,70);c.th.width=o.width;c.th.height=o.height;c.th.getContext('2d').drawImage(o,0,0)}
+const pvcIn=b=>{let w,h;if(b.w/b.h>R){h=b.h;w=h*R}else{w=b.w;h=w/R}return{x:b.x+(b.w-w)/2,y:b.y+(b.h-h)/2,w,h}};
+$('cor').onchange=()=>{if(cur){cur.cor=$('cor').value;thumb(cur)}};
+$('fit').onchange=()=>{if(cur){cur.fit=$('fit').value;thumb(cur)}};
+$('ins').oninput=()=>{$('iv').textContent=$('ins').value+'%';if(cur){cur.ins=+$('ins').value;thumb(cur)}};
+$('appl').onclick=()=>{if(!cur)return;cards.filter(c=>c.cb.checked).forEach(c=>{c.cor=cur.cor;c.fit=cur.fit;c.ins=cur.ins;thumb(c)});count()};
+$('pvc').onclick=()=>{if(cur){cur.rect=pvcIn(cur.rect);show();thumb(cur)}};
+
+/* ---- editor ---- */
+function edit(c){
+  cur=c;cards.forEach(x=>x.el.classList.toggle('on',x===c));
+  $('cor').value=c.cor;$('fit').value=c.fit;$('ins').value=c.ins;$('iv').textContent=c.ins+'%';
+  const s=c.page.canvas;pg.width=s.width;pg.height=s.height;pg.getContext('2d').drawImage(s,0,0);
+  const ch=$('cands');ch.innerHTML='';
+  c.page.boxes.slice(0,6).forEach((b,i)=>{const bt=document.createElement('button');bt.textContent='Area '+(i+1);
+    bt.onclick=()=>{cur.rect=pvcIn(trim(cur.page.canvas,b));show();thumb(cur)};ch.append(bt)});
+  $('ed').hidden=false;show();
+}
+function show(){
+  if(!cur)return;const s=pg.clientWidth/pg.width,r=cur.rect;
+  $('rd').textContent='Box ratio '+(r.w/r.h).toFixed(2)+' (card 1.59)';cr.style.left=r.x*s+'px';cr.style.top=r.y*s+'px';cr.style.width=r.w*s+'px';cr.style.height=r.h*s+'px';
+}
+addEventListener('resize',show);new ResizeObserver(show).observe(pg);
+$('trim').onclick=()=>{if(cur){cur.rect=trim(cur.page.canvas,cur.rect);show();thumb(cur)}};
+$('addc').onclick=()=>{if(!cur)return;const p=cur.page;
+  newCard(p,{x:p.canvas.width*.1,y:p.canvas.height*.1,w:p.canvas.width*.5,h:p.canvas.width*.5/R},cur.name.replace(/_\d+$/,'')+'_x');edit(cards[cards.length-1])};
+$('delc').onclick=()=>{if(!cur)return;cur.el.remove();cards=cards.filter(c=>c!==cur);cur=null;count();
+  if(cards.length)edit(cards[0]);else{['ed','cbox','ex'].forEach(i=>$(i).hidden=true)}};
+let drag=null;
+cr.addEventListener('pointerdown',e=>{e.preventDefault();cr.setPointerCapture(e.pointerId);drag={h:e.target.dataset.h||'mv',x:e.clientX,y:e.clientY,r:{...cur.rect}}});
+cr.addEventListener('pointermove',e=>{
+  if(!drag)return;const s=pg.clientWidth/pg.width,dx=(e.clientX-drag.x)/s,dy=(e.clientY-drag.y)/s,o=drag.r;
+  let{x,y,w,h}=o;
+  if(drag.h==='mv'){x=o.x+dx;y=o.y+dy}
+  else{const L=drag.h.includes('w'),T=drag.h.includes('n');
+    w=L?o.w-dx:o.w+dx;h=T?o.h-dy:o.h+dy;if($('lock').checked)h=w/R;
+    w=Math.max(40,w);h=Math.max(25,h);if(L)x=o.x+o.w-w;if(T)y=o.y+o.h-h}
+  x=Math.max(0,Math.min(x,pg.width-w));y=Math.max(0,Math.min(y,pg.height-h));
+  cur.rect={x,y,w,h};show();
+});
+const end=()=>{if(drag){drag=null;thumb(cur)}};
+cr.addEventListener('pointerup',end);cr.addEventListener('pointercancel',end);
+
+/* ---- export ---- */
+async function save(name,data){
+  if(dl){await dl.save({filename:name,data});return}
+  const a=document.createElement('a');a.href=URL.createObjectURL(data);a.download=name;
+  document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000);
+  await new Promise(r=>setTimeout(r,350));
+}
+const sel=()=>cards.filter(c=>c.cb.checked);
+async function guard(fn){
+  if(!sel().length){$('st').textContent='Select at least one card.';return}
+  try{await fn();$('st').textContent='Done.'}
+  catch(e){$('st').textContent=e&&e.code==='declined'?'Save cancelled.':'Error: '+((e&&e.message)||e)}
+}
+const native=()=>!!(window.Capacitor&&Capacitor.isNativePlatform&&Capacitor.isNativePlatform());
+const b64=b=>new Promise(r=>{const f=new FileReader();f.onload=()=>r(f.result.split(',')[1]);f.readAsDataURL(b)});
+async function saveAll(list){
+  if(native()){const P=Capacitor.Plugins,uris=[];
+    for(const[n,b]of list){const r=await P.Filesystem.writeFile({path:'PdfCrop/'+n,data:await b64(b),directory:'CACHE',recursive:true});uris.push(r.uri)}
+    await P.Share.share({title:'PdfCrop',files:uris,dialogTitle:'Save or share cards'});return}
+  for(const[n,b]of list)await save(n,b);
+}
+$('sj').onclick=()=>guard(async()=>{const L=[];
+  for(const c of sel()){const o=render(c,+$('dpi').value);L.push([c.name+'.jpg',await new Promise(r=>o.toBlob(r,'image/jpeg',.95))])}
+  await saveAll(L)});
+$('sz').onclick=()=>guard(async()=>{const z=new JSZip();
+  for(const c of sel()){const o=render(c,+$('dpi').value);z.file(c.name+'.jpg',await new Promise(r=>o.toBlob(r,'image/jpeg',.95)))}
+  await saveAll([['cards.zip',await z.generateAsync({type:'blob'})]])});
+$('sp').onclick=()=>guard(async()=>{
+  const dpi=+$('dpi').value,mk=()=>new jspdf.jsPDF({orientation:'landscape',unit:'mm',format:[CW,CH]});
+  const add=(p,c)=>p.addImage(render(c,dpi).toDataURL('image/jpeg',.95),'JPEG',0,0,CW,CH);
+  if($('pm').value==='one'){const p=mk();sel().forEach((c,i)=>{if(i)p.addPage([CW,CH],'landscape');add(p,c)});await saveAll([['cards.pdf',p.output('blob')]])}
+  else{const L=[];for(const c of sel()){const p=mk();add(p,c);L.push([c.name+'.pdf',p.output('blob')])}await saveAll(L)}});
+</script>
+</body>
+</html>
