@@ -3,6 +3,9 @@
 Crop Aadhaar, PAN, Ayushman, ABHA and other cards from PDFs/images to PVC card size (85.6 x 54 mm).
 Works offline; files never leave your phone. The APK is built automatically by GitHub Actions.
 
+## IMPORTANT (first time only)
+Uninstall any old PDFCrop app from your phone first. Older builds were signed with a different key, so Android refuses to install a new APK over them and the old app (old icon, no exit screen) keeps running. From this build on, every new APK installs over the previous one. The app header shows "build N" so you can check you have the newest.
+
 ## Get the APK (no Android Studio needed)
 1. Create a new GitHub repository and upload everything in this folder (keep the `.github` folder).
 2. Open the **Actions** tab > **Build APK** > **Run workflow** (it also runs on every push to `main`).

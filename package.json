@@ -5,7 +5,6 @@
   "description": "PDFCrop - crop ID cards from PDFs to PVC card size",
   "dependencies": {
     "@capacitor/android": "^6.1.2",
-    "@capacitor/app": "^6.0.1",
     "@capacitor/core": "^6.1.2"
   },
   "devDependencies": {

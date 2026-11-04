@@ -1,6 +1,8 @@
 package com.pdfcrop.app;
 
+import android.Manifest;
 import android.content.ContentValues;
+import android.content.pm.PackageManager;
 import android.content.Context;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
@@ -10,6 +12,9 @@ import android.os.Handler;
 import android.os.Looper;
 import android.provider.MediaStore;
 import android.util.Base64;
+
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 import com.getcapacitor.JSObject;
 import com.getcapacitor.Plugin;
@@ -31,6 +36,13 @@ public class DownloadSaverPlugin extends Plugin {
         String data = call.getString("data");
         String mime = call.getString("mime", "application/octet-stream");
         if (name == null || data == null) { call.reject("Missing name or data"); return; }
+        if (Build.VERSION.SDK_INT < 29 && ContextCompat.checkSelfPermission(getContext(),
+                Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(getActivity(),
+                new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1001);
+            call.reject("Storage permission requested. Tap Allow, then press Save again.");
+            return;
+        }
         try {
             byte[] bytes = Base64.decode(data, Base64.DEFAULT);
             Context ctx = getContext();

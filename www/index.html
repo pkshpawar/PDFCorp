@@ -45,7 +45,7 @@ label{color:var(--mut);font-size:.9rem}input[type=range]{accent-color:#ff9933}in
 </style>
 </head>
 <body>
-<header><img src="icon-192.png" alt=""><div><b>PDFCrop</b><small>ID card cropper · PVC size 85.6 × 54 mm</small></div><button class="gh" id="xit">Exit</button></header><i class="tri"></i>
+<header><img src="icon-192.png" alt=""><div><b>PDFCrop</b><small>ID card cropper · PVC 85.6 × 54 mm · v1.0 build <span id="bn">__BUILD__</span></small></div><button class="gh" id="xit">Exit</button></header><i class="tri"></i>
 <main>
 <p class="s">Cards from Aadhaar, PAN, Voter ID, Ayushman and more. Cropped in your browser at PVC size (85.6 × 54 mm). Nothing is uploaded.</p>
 
@@ -289,12 +289,11 @@ async function guard(fn){
   catch(e){$('st').textContent=e&&e.code==='declined'?'Save cancelled.':'Error: '+((e&&e.message)||e)}
 }
 const native=()=>!!(window.Capacitor&&Capacitor.isNativePlatform&&Capacitor.isNativePlatform());
-var _pl={};function plugin(n){try{return _pl[n]||(_pl[n]=Capacitor.registerPlugin(n))}catch(e){return null}}
+function call(p,m,o){return Capacitor.nativePromise?Capacitor.nativePromise(p,m,o||{}):Capacitor.registerPlugin(p)[m](o||{})}
 const b64=b=>new Promise(r=>{const f=new FileReader();f.onload=()=>r(f.result.split(',')[1]);f.readAsDataURL(b)});
 const MIME={jpg:'image/jpeg',pdf:'application/pdf',zip:'application/zip'};
 async function saveAll(list){
-  if(native()){const DS=plugin('DownloadSaver');if(!DS)throw new Error('Save plugin not available');
-    for(const[n,b]of list)await DS.save({name:n,data:await b64(b),mime:MIME[n.split('.').pop()]||b.type});
+  if(native()){for(const[n,b]of list)await call('DownloadSaver','save',{name:n,data:await b64(b),mime:MIME[n.split('.').pop()]||b.type});
     return 'Saved '+list.length+' file(s) to Download/PDFCrop'}
   for(const[n,b]of list)await save(n,b);
 }
@@ -309,20 +308,19 @@ $('sp').onclick=()=>guard(async()=>{
   const add=(p,c)=>p.addImage(render(c,dpi).toDataURL('image/jpeg',.95),'JPEG',0,0,CW,CH);
   if($('pm').value==='one'){const p=mk();sel().forEach((c,i)=>{if(i)p.addPage([CW,CH],'landscape');add(p,c)});return await saveAll([['cards.pdf',p.output('blob')]])}
   else{const L=[];for(const c of sel()){const p=mk();add(p,c);L.push([c.name+'.pdf',p.output('blob')])}return await saveAll(L)}});
-/* ---- exit message ---- */
+/* ---- exit message (2 s, then the app really closes) ---- */
 let leaving=false;
 function quit(){
   $('bye').hidden=true;leaving=false;
   if(!native()){try{window.close()}catch(e){}return}
-  try{plugin('App').exitApp()}catch(e){}
-  try{plugin('DownloadSaver').exit()}catch(e){}
+  try{call('DownloadSaver','exit')}catch(e){}
 }
 function bye(){
   if(leaving)return;leaving=true;$('bye').hidden=false;
   setTimeout(quit,2000);
 }
+window.pdfcropBye=bye;   // called by the Android Back button
 $('xit').onclick=bye;
-try{if(native())plugin('App').addListener('backButton',bye)}catch(e){}
 </script>
 </body>
 </html>
