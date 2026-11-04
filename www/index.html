@@ -30,13 +30,13 @@ label{color:var(--mut);font-size:.9rem}input[type=range]{accent-color:#ff9933}in
 .cd{border:2px solid var(--bd);border-radius:12px;padding:6px;cursor:pointer;background:var(--card)}.cd.on{border-color:#ff9933;box-shadow:0 0 0 3px rgba(255,153,51,.25)}
 .cd canvas{width:100%;height:auto;display:block;margin-top:4px;border-radius:6px;background:#8884}
 .cd span{font-size:.8rem;color:var(--mut);word-break:break-all}
-#stage{position:relative;display:inline-block;max-width:100%;line-height:0}
+#stage{position:relative;display:block;width:max-content;margin:0 auto;line-height:0}
 #pg{max-width:100%;height:auto;border:1px solid var(--bd);background:#fff}
 #cr{touch-action:none;position:absolute;border:2px solid #ff9933;box-shadow:0 0 0 9999px rgba(8,20,48,.55);cursor:move}
 .h{position:absolute;width:22px;height:22px;background:#ff9933;border-radius:50%;border:2px solid #fff}
 .h[data-h=nw]{left:-11px;top:-11px;cursor:nwse-resize}.h[data-h=ne]{right:-11px;top:-11px;cursor:nesw-resize}
 .h[data-h=sw]{left:-11px;bottom:-11px;cursor:nesw-resize}.h[data-h=se]{right:-11px;bottom:-11px;cursor:nwse-resize}
-.wrap{overflow:auto;text-align:center}
+.wrap{overflow:auto;max-height:72vh;touch-action:pan-x pan-y;border-radius:8px}
 #bye{position:fixed;inset:0;z-index:99;background:linear-gradient(160deg,#0e2a5c,#1f5a9a);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:6px;padding:24px}
 #bye[hidden]{display:none}
 .fl{width:150px;height:100px;border-radius:6px;background:linear-gradient(#ff9933 33.3%,#fff 33.3% 66.6%,#138808 66.6%);position:relative;box-shadow:0 6px 18px rgba(0,0,0,.4);margin-bottom:14px}
@@ -66,10 +66,10 @@ label{color:var(--mut);font-size:.9rem}input[type=range]{accent-color:#ff9933}in
 </div>
 
 <div class="box" id="ed" hidden>
-<div class="row" style="margin-bottom:10px"><button id="pvc">PVC card ratio</button><button id="trim">Trim border</button><button id="addc">+ Add card on this page</button><button id="delc">Remove card</button><span id="cands" class="row"></span></div>
+<div class="row" style="margin-bottom:10px"><button id="pvc">PVC card ratio</button><button id="trim">Trim border</button><button id="addc">+ Add card on this page</button><button id="delc">Remove card</button><span class="row"><button id="zo" title="Zoom out">−</button><button id="zi" title="Zoom in">+</button><button id="zf">Fit</button><span id="zl" class="msg" style="margin:0">100%</span></span><span id="cands" class="row"></span></div>
 <div class="row" style="margin-bottom:10px"><label>Corners <select id="cor"><option value="sharp">Sharp</option><option value="round">Rounded</option></select></label><label>Fit <select id="fit"><option value="auto">Auto</option><option value="stretch">Stretch to card</option><option value="contain">Keep proportions (white bars)</option><option value="cover">Fill, crop overflow</option></select></label><label>Inset <input type="range" id="ins" min="0" max="8" step="0.5" value="1.5"> <span id="iv">1.5%</span></label><button id="appl">Apply to all ticked cards</button></div>
-<div class="wrap"><div id="stage"><canvas id="pg"></canvas><div id="cr"><i class="h" data-h="nw"></i><i class="h" data-h="ne"></i><i class="h" data-h="sw"></i><i class="h" data-h="se"></i></div></div></div>
-<div class="row" style="margin-top:8px"><label><input type="checkbox" id="lock"> Lock ratio</label><span id="rd" class="msg" style="margin:0"></span><span class="msg" style="margin:0">Drag box to move, corners to resize.</span></div>
+<div class="wrap" id="wz"><div id="stage"><canvas id="pg"></canvas><div id="cr"><i class="h" data-h="nw"></i><i class="h" data-h="ne"></i><i class="h" data-h="sw"></i><i class="h" data-h="se"></i></div></div></div>
+<div class="row" style="margin-top:8px"><label><input type="checkbox" id="lock"> Lock ratio</label><span id="rd" class="msg" style="margin:0"></span><span class="msg" style="margin:0">Drag box to move, corners to resize. Pinch with two fingers to zoom.</span></div>
 </div>
 
 <div class="box" id="ex" hidden>
@@ -248,20 +248,41 @@ function edit(c){
   const ch=$('cands');ch.innerHTML='';
   c.page.boxes.slice(0,6).forEach((b,i)=>{const bt=document.createElement('button');bt.textContent='Area '+(i+1);
     bt.onclick=()=>{cur.rect=pvcIn(trim(cur.page.canvas,b));show();thumb(cur)};ch.append(bt)});
-  $('ed').hidden=false;show();
+  $('ed').hidden=false;zoom=1;applyZoom();wz.scrollTo(0,0);show();
 }
 function show(){
   if(!cur)return;const s=pg.clientWidth/pg.width,r=cur.rect;
   $('rd').textContent='Box ratio '+(r.w/r.h).toFixed(2)+' (card 1.59)';cr.style.left=r.x*s+'px';cr.style.top=r.y*s+'px';cr.style.width=r.w*s+'px';cr.style.height=r.h*s+'px';
 }
-addEventListener('resize',show);new ResizeObserver(show).observe(pg);
+/* ---- zoom: pinch with two fingers, +/- buttons, Ctrl+wheel; drag to scroll ---- */
+let zoom=1,pz=null,pinching=false;const wz=$('wz');
+function applyZoom(){const bw=Math.max(100,Math.min(wz.clientWidth-4,pg.width));pg.style.maxWidth='none';pg.style.width=(bw*zoom)+'px';$('zl').textContent=Math.round(zoom*100)+'%'}
+function setZoom(z,fx,fy){
+  z=Math.max(1,Math.min(8,z));
+  if(fx==null){fx=wz.clientWidth/2;fy=wz.clientHeight/2}
+  const cx=(wz.scrollLeft+fx)/pg.clientWidth,cy=(wz.scrollTop+fy)/pg.clientHeight;
+  zoom=z;applyZoom();
+  wz.scrollLeft=cx*pg.clientWidth-fx;wz.scrollTop=cy*pg.clientHeight-fy;show();
+}
+$('zi').onclick=()=>setZoom(zoom*1.4);$('zo').onclick=()=>setZoom(zoom/1.4);$('zf').onclick=()=>setZoom(1);
+wz.addEventListener('wheel',e=>{if(e.ctrlKey||e.metaKey){e.preventDefault();const r=wz.getBoundingClientRect();setZoom(zoom*(e.deltaY<0?1.15:1/1.15),e.clientX-r.left,e.clientY-r.top)}},{passive:false});
+const dist=t=>Math.hypot(t[0].clientX-t[1].clientX,t[0].clientY-t[1].clientY);
+wz.addEventListener('touchstart',e=>{if(e.touches.length===2){pinching=true;drag=null;pz={d:dist(e.touches),z:zoom}}},{passive:true});
+wz.addEventListener('touchmove',e=>{
+  if(pinching&&pz&&e.touches.length===2){e.preventDefault();
+    const r=wz.getBoundingClientRect(),t=e.touches;
+    setZoom(pz.z*dist(t)/pz.d,(t[0].clientX+t[1].clientX)/2-r.left,(t[0].clientY+t[1].clientY)/2-r.top)}
+},{passive:false});
+const pend=e=>{if(e.touches.length<2){pinching=false;pz=null}};
+wz.addEventListener('touchend',pend);wz.addEventListener('touchcancel',pend);
+addEventListener('resize',()=>{applyZoom();show()});new ResizeObserver(show).observe(pg);
 $('trim').onclick=()=>{if(cur){cur.rect=trim(cur.page.canvas,cur.rect);show();thumb(cur)}};
 $('addc').onclick=()=>{if(!cur)return;const p=cur.page;
   newCard(p,{x:p.canvas.width*.1,y:p.canvas.height*.1,w:p.canvas.width*.5,h:p.canvas.width*.5/R},cur.name.replace(/_\d+$/,'')+'_x');edit(cards[cards.length-1])};
 $('delc').onclick=()=>{if(!cur)return;cur.el.remove();cards=cards.filter(c=>c!==cur);cur=null;count();
   if(cards.length)edit(cards[0]);else{['ed','cbox','ex'].forEach(i=>$(i).hidden=true)}};
 let drag=null;
-cr.addEventListener('pointerdown',e=>{e.preventDefault();cr.setPointerCapture(e.pointerId);drag={h:e.target.dataset.h||'mv',x:e.clientX,y:e.clientY,r:{...cur.rect}}});
+cr.addEventListener('pointerdown',e=>{if(pinching)return;e.preventDefault();cr.setPointerCapture(e.pointerId);drag={h:e.target.dataset.h||'mv',x:e.clientX,y:e.clientY,r:{...cur.rect}}});
 cr.addEventListener('pointermove',e=>{
   if(!drag)return;const s=pg.clientWidth/pg.width,dx=(e.clientX-drag.x)/s,dy=(e.clientY-drag.y)/s,o=drag.r;
   let{x,y,w,h}=o;
